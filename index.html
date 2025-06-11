@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Posts Table with Modal</title>
+
+  <!-- Bootstrap & DataTables CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+  <link href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css" rel="stylesheet">
+
+  <!-- External JSON as JS -->
+  <script src="metro2.js"></script>
+  <script src="users.js"></script>
+</head>
+<body class="container py-4">
+
+<h2 class="mb-4">Data Konsumen</h2>
+<table id="postsTable" class="table table-striped table-bordered w-100">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Nama</th>
+      <th>Kode</th>
+      <th>KTP</th>
+      <th>Alamat</th>
+      <th>HP</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="postModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Kode : <span id="modalBody"></span></p>
+        <h6>Riwayat Konsumen</h6>
+        <div id="modalUsers"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JS Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<script>
+  const tableBody = document.querySelector("#postsTable tbody");
+  const modal = new bootstrap.Modal(document.getElementById('postModal'));
+  const modalTitle = document.getElementById("modalTitle");
+  const modalBody = document.getElementById("modalBody");
+  const modalUsers = document.getElementById("modalUsers");
+
+  window.posts.forEach(post => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${post.id}</td>
+      <td><a href="#" onclick="showModal(${post.id});return false;">${post.title}</a></td>
+      <td><a href="#" onclick="showModal(${post.id});return false;">${post.position}</a></td>
+      <td>${post.department}</td>
+      <td>${post.salary}</td>
+      <td>${post.status}</td>
+    `;
+    tableBody.appendChild(row);
+  });
+
+  $(document).ready(function () {
+    $('#postsTable').DataTable({
+      responsive: false,
+      autoWidth: true,
+      scrollX: true
+    });
+  });
+
+  window.showModal = function(postId) {
+    const post = window.posts.find(p => p.id === postId);
+    const matchedUsers = window.users.filter(u => u.id === post.id);
+
+    modalTitle.textContent = post.title;
+    modalBody.textContent = post.position;
+    modalUsers.innerHTML = matchedUsers.length
+      ? matchedUsers.map(user => `
+        <div class="border p-2 mb-2 bg-light">
+          <strong>${user.name}</strong> (${user.username})<br>
+          Email: ${user.email}<br>
+          Company: ${user.company?.name ?? "N/A"}<br>
+          Website: <a href="http://${user.website}" target="_blank">${user.website}</a>
+        </div>
+      `).join('')
+      : "<em>No matching users found.</em>";
+
+    modal.show();
+  };
+</script>
+
+</body>
+</html>
